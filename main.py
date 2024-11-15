@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from anthropic import Anthropic
+from anthropic import Anthropic, CLAUDE_3_SONNET
 import json
 from datetime import datetime
 
@@ -28,18 +28,17 @@ def get_claude_recommendations(theme):
     {{"sections": {{"section_name": {{"duration": "str", "intensity": "str", "songs": [{{"name": "str", "artist": "str", "length": "str", "intensity": int, "reason": "str"}}]}}}}}}
     """
 
-    message = anthropic_client.messages.create(
-        model="claude-3-sonnet-20240229",
-        max_tokens=1500,
-        temperature=0.7,
-        system="You are a yoga music expert who provides song recommendations.",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
     try:
+        message = anthropic_client.beta.messages.create(
+            model=CLAUDE_3_SONNET,
+            max_tokens=1500,
+            temperature=0.7,
+            system="You are a yoga music expert who provides song recommendations.",
+            messages=[{"role": "user", "content": prompt}]
+        )
         return json.loads(message.content[0].text)
-    except:
-        st.error("Error parsing Claude's response. Please try again.")
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
         return None
 
 def calculate_duration(length_str):
@@ -49,7 +48,6 @@ def calculate_duration(length_str):
 def main():
     st.set_page_config(page_title="Yoga Playlist Creator", page_icon="🧘‍♀️", layout="wide")
     
-    # Custom CSS
     st.markdown("""
         <style>
         .stAlert {border-radius: 10px;}
@@ -60,19 +58,16 @@ def main():
     
     st.title("🧘‍♀️ Yoga Playlist Creator")
     
-    # Session state initialization
     if 'recommendations' not in st.session_state:
         st.session_state.recommendations = None
     if 'playlist_history' not in st.session_state:
         st.session_state.playlist_history = []
     
-    # Sidebar
     with st.sidebar:
         st.header("🎵 Recent Playlists")
         for idx, playlist in enumerate(st.session_state.playlist_history[-5:]):
             st.text(f"{idx + 1}. {playlist['theme']}")
     
-    # Main interface
     col1, col2 = st.columns([2, 1])
     
     with col1:
@@ -90,7 +85,6 @@ def main():
             if clear:
                 st.session_state.recommendations = None
     
-    # Generate recommendations
     if generate:
         if not theme:
             st.error("Please enter a music theme.")
@@ -106,7 +100,6 @@ def main():
                         'recommendations': st.session_state.recommendations
                     })
     
-    # Display recommendations
     if st.session_state.recommendations:
         st.markdown("### 🎵 Your Customized Yoga Playlist")
         
