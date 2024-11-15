@@ -39,49 +39,95 @@ def adjust_section_times(duration):
 def get_claude_recommendations(theme, class_duration):
     section_times = adjust_section_times(class_duration)
     
-    prompt = f"""Create a playlist for a {class_duration}-minute yoga class with theme: {theme}.
-    
-    Follow this exact JSON structure:
+    prompt = f"""Create a playlist for a {class_duration}-minute yoga class with theme: {theme}. Return this exact JSON structure, replacing the example values:
     {{
         "sections": {{
             "Grounding & Warm Up": {{
                 "duration": "{section_times['Grounding & Warm Up']} minutes",
-                "intensity": "1-2",
-                "songs": []
+                "section_intensity": "1-2",
+                "songs": [
+                    {{
+                        "name": "Example Song",
+                        "artist": "Example Artist",
+                        "length": "03:30",
+                        "intensity": 1,
+                        "reason": "Example reason"
+                    }}
+                ]
             }},
             "Sun Salutations": {{
-                "duration": "{section_times['Sun Salutations']} minutes",
-                "intensity": "1-3",
-                "songs": []
+                "duration": "{section_times['Sun Salutations']} minutes", 
+                "section_intensity": "1-3",
+                "songs": [
+                    {{
+                        "name": "Example Song",
+                        "artist": "Example Artist", 
+                        "length": "03:30",
+                        "intensity": 2,
+                        "reason": "Example reason"
+                    }}
+                ]
             }},
             "Movement Series 1": {{
                 "duration": "{section_times['Movement Series 1']} minutes",
-                "intensity": "2-3",
-                "songs": []
+                "section_intensity": "2-3",
+                "songs": [
+                    {{
+                        "name": "Example Song",
+                        "artist": "Example Artist",
+                        "length": "03:30",
+                        "intensity": 2,
+                        "reason": "Example reason"
+                    }}
+                ]
             }},
             "Movement Series 2": {{
                 "duration": "{section_times['Movement Series 2']} minutes",
-                "intensity": "2-4",
-                "songs": []
+                "section_intensity": "2-4",
+                "songs": [
+                    {{
+                        "name": "Example Song",
+                        "artist": "Example Artist",
+                        "length": "03:30",
+                        "intensity": 3,
+                        "reason": "Example reason"
+                    }}
+                ]
             }},
             "Integration Series": {{
                 "duration": "{section_times['Integration Series']} minutes",
-                "intensity": "2-4",
-                "songs": []
+                "section_intensity": "2-4",
+                "songs": [
+                    {{
+                        "name": "Example Song",
+                        "artist": "Example Artist",
+                        "length": "03:30",
+                        "intensity": 3,
+                        "reason": "Example reason"
+                    }}
+                ]
             }},
             "Savasana": {{
                 "duration": "{section_times['Savasana']} minutes",
-                "intensity": "1-2",
-                "songs": []
+                "section_intensity": "1-2",
+                "songs": [
+                    {{
+                        "name": "Example Song",
+                        "artist": "Example Artist",
+                        "length": "03:30",
+                        "intensity": 1,
+                        "reason": "Example reason"
+                    }}
+                ]
             }}
         }}
     }}
 
     For each section:
     - Include 2-3 songs that fit within the section's time limit
-    - Match intensity levels
+    - Match song intensities (1-5) to section_intensity range
     - Use MM:SS format for length
-    - Include brief reasoning
+    - Include brief reason
     """
 
     try:
@@ -168,7 +214,7 @@ def main():
         
         total_duration = 0
         for section, details in st.session_state.recommendations['sections'].items():
-            with st.expander(f"🎼 {section} ({details['duration']} | Intensity: {details['intensity']})"):
+            with st.expander(f"🎼 {section} ({details['duration']} | Intensity: {details['section_intensity']})"):
                 songs_df = pd.DataFrame(details['songs'])
                 
                 section_duration = sum(calculate_duration(song['length']) for song in details['songs'])
