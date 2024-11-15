@@ -135,7 +135,7 @@ def get_claude_recommendations(theme, class_duration):
             model="claude-3-sonnet-20240229",
             max_tokens=1500,
             temperature=0.7,
-            system="You are a yoga music expert. Respond only with valid JSON.",
+            system="You are a yoga music expert.Do not make songs up. Respond only with valid JSON.",
             messages=[{"role": "user", "content": prompt}]
         )
         return json.loads(message.content[0].text)
