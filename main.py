@@ -228,4 +228,30 @@ def main():
                         "artist": st.column_config.TextColumn("Artist"),
                         "length": st.column_config.TextColumn("Duration"),
                         "intensity": st.column_config.NumberColumn(
+                            "Intensity",
+                            help="1 (very calm) to 5 (high energy)",
+                            min_value=1,
+                            max_value=5,
+                            format="%d ⚡"
+                        ),
+                        "reason": st.column_config.TextColumn("Why This Song")
+                    }
+                )
+                
+                st.caption(f"Section duration: {section_duration//60}:{section_duration%60:02d}")
+        
+        st.success(f"Total Playlist Duration: {total_duration//60} minutes {total_duration%60} seconds")
+        
+        col3, col4 = st.columns(2)
+        with col3:
+            st.download_button(
+                "💾 Download Playlist",
+                data=json.dumps(st.session_state.recommendations, indent=4),
+                file_name=f"yoga_playlist_{theme}_{class_duration}min_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
+                mime="application/json",
+                use_container_width=True
+            )
+
+if __name__ == "__main__":
+    main()
                    
