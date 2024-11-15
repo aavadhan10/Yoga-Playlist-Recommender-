@@ -15,7 +15,7 @@ def adjust_section_times(duration):
             "Movement Series 1": "6-8",
             "Movement Series 2": "8-10",
             "Integration Series": "6-8",
-            "Savasana": "5-7"
+            "Cool Down & Savasana": "5-7"
         }
     elif duration == "75":
         return {
@@ -24,7 +24,7 @@ def adjust_section_times(duration):
             "Movement Series 1": "12-15",
             "Movement Series 2": "15-17",
             "Integration Series": "12-15",
-            "Savasana": "10-12"
+            "Cool Down & Savasana": "10-12"
         }
     else:  # 60 minutes
         return {
@@ -33,7 +33,7 @@ def adjust_section_times(duration):
             "Movement Series 1": "8-10",
             "Movement Series 2": "10-12",
             "Integration Series": "8-10",
-            "Savasana": "8-10"
+            "Cool Down & Savasana": "8-10"
         }
 
 def get_claude_recommendations(theme, class_duration):
@@ -107,7 +107,7 @@ def get_claude_recommendations(theme, class_duration):
                     }}
                 ]
             }},
-            "Savasana": {{
+            " Cool Down & Savasana": {{
                 "duration": "{section_times['Savasana']} minutes",
                 "section_intensity": "1-2",
                 "songs": [
