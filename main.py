@@ -8,24 +8,59 @@ import os
 anthropic_client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 def get_claude_recommendations(theme):
-    prompt = f"""You are a yoga music expert. Create a playlist for a 60-minute yoga class with the theme: {theme}.
+    prompt = f"""Create a playlist for a 60-minute yoga class with theme: {theme}.
     
-    The class has these sections:
-    1. Grounding & Warm Up (8-10 min): Intensity 1-2
-    2. Sun Salutations (2-3 min): Intensity 1-3
-    3. Movement Series 1 (8-10 min): Intensity 2-3
-    4. Movement Series 2 (10-12 min): Intensity 2-4
-    5. Integration Series (8-10 min): Intensity 2-4
-    6. Savasana (8-10 min): Intensity 1-2
+    Follow this exact JSON structure, with no deviations:
+    {{
+        "sections": {{
+            "Grounding & Warm Up": {{
+                "duration": "8-10 minutes",
+                "intensity": "1-2",
+                "songs": [
+                    {{
+                        "name": "Song Name",
+                        "artist": "Artist Name",
+                        "length": "3:30",
+                        "intensity": 1,
+                        "reason": "Brief explanation"
+                    }}
+                ]
+            }},
+            "Sun Salutations": {{
+                "duration": "2-3 minutes",
+                "intensity": "1-3",
+                "songs": []
+            }},
+            "Movement Series 1": {{
+                "duration": "8-10 minutes",
+                "intensity": "2-3",
+                "songs": []
+            }},
+            "Movement Series 2": {{
+                "duration": "10-12 minutes",
+                "intensity": "2-4",
+                "songs": []
+            }},
+            "Integration Series": {{
+                "duration": "8-10 minutes",
+                "intensity": "2-4",
+                "songs": []
+            }},
+            "Savasana": {{
+                "duration": "8-10 minutes",
+                "intensity": "1-2",
+                "songs": []
+            }}
+        }}
+    }}
 
-    For each section, recommend 3 songs that fit the intensity and theme. Include:
-    - Song name and artist
-    - Duration (MM:SS format)
-    - Intensity level (1-5)
-    - Brief explanation why this song fits
-
-    Return as JSON in this format:
-    {{"sections": {{"section_name": {{"duration": "str", "intensity": "str", "songs": [{{"name": "str", "artist": "str", "length": "str", "intensity": int, "reason": "str"}}]}}}}}}
+    For each section:
+    - Include exactly 3 songs
+    - Each song should match the section's intensity level
+    - Song length should be in MM:SS format
+    - Intensity should be an integer 1-5
+    - Include a brief reason why each song fits
+    - Ensure all songs fit the {theme} theme
     """
 
     try:
@@ -33,12 +68,12 @@ def get_claude_recommendations(theme):
             model="claude-3-sonnet-20240229",
             max_tokens=1500,
             temperature=0.7,
-            system="You are a yoga music expert who provides song recommendations.",
+            system="You are a yoga music expert. Respond only with valid JSON.",
             messages=[{"role": "user", "content": prompt}]
         )
         return json.loads(message.content[0].text)
     except Exception as e:
-        st.error(f"Error: {str(e)}")
+        st.error(f"Error parsing response: {str(e)}")
         return None
 
 def calculate_duration(length_str):
