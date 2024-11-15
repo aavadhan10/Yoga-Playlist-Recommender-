@@ -112,7 +112,7 @@ def main():
         </style>
     """, unsafe_allow_html=True)
     
-    st.title("🧘‍♀️ Yoga Playlist Creator")
+    st.title("🧘‍♀️ Karma Yoga Playlist Recommmender")
     
     if 'recommendations' not in st.session_state:
         st.session_state.recommendations = None
