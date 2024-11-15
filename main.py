@@ -7,47 +7,70 @@ import os
 
 anthropic_client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-def get_claude_recommendations(theme):
-    prompt = f"""Create a playlist for a 60-minute yoga class with theme: {theme}.
+def adjust_section_times(duration):
+    if duration == "45":
+        return {
+            "Grounding & Warm Up": "5-7",
+            "Sun Salutations": "2-3",
+            "Movement Series 1": "6-8",
+            "Movement Series 2": "8-10",
+            "Integration Series": "6-8",
+            "Savasana": "5-7"
+        }
+    elif duration == "75":
+        return {
+            "Grounding & Warm Up": "10-12",
+            "Sun Salutations": "3-4",
+            "Movement Series 1": "12-15",
+            "Movement Series 2": "15-17",
+            "Integration Series": "12-15",
+            "Savasana": "10-12"
+        }
+    else:  # 60 minutes
+        return {
+            "Grounding & Warm Up": "8-10",
+            "Sun Salutations": "2-3",
+            "Movement Series 1": "8-10",
+            "Movement Series 2": "10-12",
+            "Integration Series": "8-10",
+            "Savasana": "8-10"
+        }
+
+def get_claude_recommendations(theme, class_duration):
+    section_times = adjust_section_times(class_duration)
     
-    Follow this exact JSON structure, with no deviations:
+    prompt = f"""Create a playlist for a {class_duration}-minute yoga class with theme: {theme}.
+    
+    Follow this exact JSON structure:
     {{
         "sections": {{
             "Grounding & Warm Up": {{
-                "duration": "8-10 minutes",
+                "duration": "{section_times['Grounding & Warm Up']} minutes",
                 "intensity": "1-2",
-                "songs": [
-                    {{
-                        "name": "Song Name",
-                        "artist": "Artist Name",
-                        "length": "3:30",
-                        "intensity": 1,
-                        "reason": "Brief explanation"
-                    }}
-                ]
+                "songs": []
             }},
             "Sun Salutations": {{
-                "duration": "2-3 minutes",
+                "duration": "{section_times['Sun Salutations']} minutes",
                 "intensity": "1-3",
                 "songs": []
             }},
             "Movement Series 1": {{
-                "duration": "8-10 minutes",
+                "duration": "{section_times['Movement Series 1']} minutes",
                 "intensity": "2-3",
                 "songs": []
             }},
             "Movement Series 2": {{
-                "duration": "10-12 minutes",
+                "duration": "{section_times['Movement Series 2']} minutes",
                 "intensity": "2-4",
                 "songs": []
             }},
             "Integration Series": {{
-                "duration": "8-10 minutes",
+                "duration": "{section_times['Integration Series']} minutes",
                 "intensity": "2-4",
                 "songs": []
             }},
             "Savasana": {{
-                "duration": "8-10 minutes",
+                "duration": "{section_times['Savasana']} minutes",
                 "intensity": "1-2",
                 "songs": []
             }}
@@ -55,12 +78,10 @@ def get_claude_recommendations(theme):
     }}
 
     For each section:
-    - Include exactly 3 songs
-    - Each song should match the section's intensity level
-    - Song length should be in MM:SS format
-    - Intensity should be an integer 1-5
-    - Include a brief reason why each song fits
-    - Ensure all songs fit the {theme} theme
+    - Include 2-3 songs that fit within the section's time limit
+    - Match intensity levels
+    - Use MM:SS format for length
+    - Include brief reasoning
     """
 
     try:
@@ -112,6 +133,11 @@ def main():
         preferences = st.text_area("Additional preferences (optional):",
                                 placeholder="e.g., female vocals, instrumental only, specific artists...")
         
+        class_duration = st.selectbox("Class Duration:", 
+                                    options=["45", "60", "75"],
+                                    index=1,
+                                    format_func=lambda x: f"{x} Minutes")
+        
         col1_1, col1_2 = st.columns(2)
         with col1_1:
             generate = st.button("🎵 Generate Playlist", type="primary", use_container_width=True)
@@ -126,17 +152,19 @@ def main():
         else:
             with st.spinner("Creating your perfect yoga playlist..."):
                 st.session_state.recommendations = get_claude_recommendations(
-                    f"{theme} {preferences}".strip()
+                    f"{theme} {preferences}".strip(),
+                    class_duration
                 )
                 if st.session_state.recommendations:
                     st.session_state.playlist_history.append({
                         'theme': theme,
+                        'duration': f"{class_duration} minutes",
                         'timestamp': datetime.now(),
                         'recommendations': st.session_state.recommendations
                     })
     
     if st.session_state.recommendations:
-        st.markdown("### 🎵 Your Customized Yoga Playlist")
+        st.markdown(f"### 🎵 Your {class_duration}-Minute Yoga Playlist")
         
         total_duration = 0
         for section, details in st.session_state.recommendations['sections'].items():
@@ -173,7 +201,7 @@ def main():
             st.download_button(
                 "💾 Download Playlist",
                 data=json.dumps(st.session_state.recommendations, indent=4),
-                file_name=f"yoga_playlist_{theme}_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
+                file_name=f"yoga_playlist_{theme}_{class_duration}min_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
                 mime="application/json",
                 use_container_width=True
             )
