@@ -3,9 +3,9 @@ import pandas as pd
 from anthropic import Anthropic
 import json
 from datetime import datetime
+import os
 
-# Initialize Anthropic client
-anthropic_client = Anthropic(api_key='ANTHROPIC_API_KEY')  # Replace with your actual API key
+anthropic_client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 def get_claude_recommendations(theme):
     prompt = f"""You are a yoga music expert. Create a playlist for a 60-minute yoga class with the theme: {theme}.
