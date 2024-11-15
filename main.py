@@ -4,7 +4,10 @@ from anthropic import Anthropic
 import json
 from datetime import datetime
 
-def get_claude_recommendations(theme, anthropic_client):
+# Initialize Anthropic client with your API key
+anthropic_client = Anthropic(api_key='your_api_key_here')  # Replace with your actual API key
+
+def get_claude_recommendations(theme):
     prompt = f"""You are a yoga music expert. Create a playlist for a 60-minute yoga class with the theme: {theme}.
     
     The class has these sections:
@@ -65,9 +68,6 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.header("⚙️ Settings")
-        api_key = st.text_input("Anthropic API Key", type="password")
-        
         st.header("🎵 Recent Playlists")
         for idx, playlist in enumerate(st.session_state.playlist_history[-5:]):
             st.text(f"{idx + 1}. {playlist['theme']}")
@@ -92,16 +92,12 @@ def main():
     
     # Generate recommendations
     if generate:
-        if not api_key:
-            st.error("Please enter your Anthropic API key.")
-        elif not theme:
+        if not theme:
             st.error("Please enter a music theme.")
         else:
             with st.spinner("Creating your perfect yoga playlist..."):
-                anthropic_client = Anthropic(api_key=api_key)
                 st.session_state.recommendations = get_claude_recommendations(
-                    f"{theme} {preferences}".strip(),
-                    anthropic_client
+                    f"{theme} {preferences}".strip()
                 )
                 if st.session_state.recommendations:
                     st.session_state.playlist_history.append({
@@ -117,14 +113,11 @@ def main():
         total_duration = 0
         for section, details in st.session_state.recommendations['sections'].items():
             with st.expander(f"🎼 {section} ({details['duration']} | Intensity: {details['intensity']})"):
-                # Create and style DataFrame
                 songs_df = pd.DataFrame(details['songs'])
                 
-                # Calculate section duration
                 section_duration = sum(calculate_duration(song['length']) for song in details['songs'])
                 total_duration += section_duration
                 
-                # Display formatted table
                 st.dataframe(
                     songs_df,
                     hide_index=True,
@@ -143,13 +136,10 @@ def main():
                     }
                 )
                 
-                # Section duration
                 st.caption(f"Section duration: {section_duration//60}:{section_duration%60:02d}")
         
-        # Total duration display
         st.success(f"Total Playlist Duration: {total_duration//60} minutes {total_duration%60} seconds")
         
-        # Export options
         col3, col4 = st.columns(2)
         with col3:
             st.download_button(
