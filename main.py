@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
-from anthropic import Anthropic, CLAUDE_3_SONNET
+from anthropic import Anthropic
 import json
 from datetime import datetime
 
-# Initialize Anthropic client with your API key
+# Initialize Anthropic client
 anthropic_client = Anthropic(api_key='your_api_key_here')  # Replace with your actual API key
 
 def get_claude_recommendations(theme):
@@ -30,7 +30,7 @@ def get_claude_recommendations(theme):
 
     try:
         message = anthropic_client.beta.messages.create(
-            model=CLAUDE_3_SONNET,
+            model="claude-3-sonnet-20240229",
             max_tokens=1500,
             temperature=0.7,
             system="You are a yoga music expert who provides song recommendations.",
